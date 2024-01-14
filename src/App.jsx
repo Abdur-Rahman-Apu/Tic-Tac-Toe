@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 /*
 
 Game 
@@ -8,7 +6,9 @@ Game
 
 */
 
-function Square({ value, onSquareClick }) {
+import { useState } from "react";
+
+function Square({ value, onSquareClick, onPlay }) {
   return (
     <button
       onClick={onSquareClick}
@@ -19,10 +19,7 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-export default function Board() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
-  const [isTurnX, setIsTurnX] = useState(true);
-
+function Board({ squares, isTurnX, onPlay }) {
   const winner = calculateWinner(squares);
 
   console.log(winner, "winner");
@@ -42,8 +39,10 @@ export default function Board() {
 
     isTurnX ? (nextSquares[i] = "X") : (nextSquares[i] = "O");
 
-    setSquares(nextSquares);
-    setIsTurnX(!isTurnX);
+    // setSquares(nextSquares);
+    // setIsTurnX(!isTurnX);
+
+    onPlay(nextSquares);
     console.log(nextSquares, "nextSquares");
   };
 
@@ -91,4 +90,42 @@ function calculateWinner(squares) {
     }
   }
   return null;
+}
+
+function History({ history, jumpTo }) {
+  const moves = history.map((eachHistory, move) => {
+    let description =
+      move === 0 ? `Go to the start` : `Go the the move #${move}`;
+
+    return (
+      <li key={move} onClick={() => jumpTo(move)}>
+        {description}
+      </li>
+    );
+  });
+  return (
+    <div>
+      <ol>{moves}</ol>
+    </div>
+  );
+}
+
+export default function Game() {
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [isTurnX, setIsTurnX] = useState(true);
+  const [currentMove, setCurrentMove] = useState(0);
+
+  const currentSquare = history[history.length - 1];
+
+  const handlePlay = (nextSquares) => {
+    setHistory([...history, nextSquares]);
+    setIsTurnX(!isTurnX);
+  };
+  console.log(currentSquare, "current square");
+  return (
+    <div>
+      <Board squares={currentSquare} isTurnX={isTurnX} onPlay={handlePlay} />
+      <History history={history} />
+    </div>
+  );
 }
